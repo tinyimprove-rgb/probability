@@ -8,14 +8,5 @@
     "desc": "",
     "added": "2026-03-09",
     "autoAdded": false
-  },
-  {
-    "id": "demo2",
-    "title": "Bayes' Theorem",
-    "desc": "Updating beliefs with conditional probability.",
-    "url": "https://tinyimprove-rgb.github.io/probability/bayes.html",
-    "filename": "bayes.html",
-    "category": "Probability",
-    "added": "2024-01-02"
   }
 ]
