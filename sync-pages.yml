@@ -1,0 +1,35 @@
+name: 🔄 Auto-index HTML pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.html'
+
+jobs:
+  update-pages:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Update pages.json
+        run: node scripts/sync-pages.js
+
+      - name: Commit updated pages.json
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add pages.json
+          git diff --staged --quiet || git commit -m "🤖 Auto-sync pages.json [skip ci]"
+          git push
