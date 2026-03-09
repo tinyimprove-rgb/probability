@@ -1,347 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Probability & Statistics — Pages</title>
+  <title>Probability & Statistics</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --ink:     #0d1117;
-      --paper:   #f5f0e8;
-      --cream:   #ede8dc;
-      --rule:    #c8bfa8;
-      --accent:  #c0392b;
-      --accent2: #2c5f8a;
-      --text:    #1a1a2e;
-      --muted:   #7a7060;
-      --green:   #1e7a4a;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --ink:#0d1117;--paper:#f5f0e8;--cream:#ede8dc;--rule:#c8bfa8;
+      --accent:#c0392b;--accent2:#2c5f8a;--text:#1a1a2e;--muted:#7a7060;
     }
-    html { scroll-behavior: smooth; }
-    body {
-      background: var(--paper);
-      color: var(--text);
-      font-family: 'IBM Plex Sans', sans-serif;
-      font-weight: 300;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .35; }
-    .wrapper { position: relative; z-index: 1; max-width: 980px; margin: 0 auto; padding: 0 28px 100px; }
+    body{background:var(--paper);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden}
+    #bg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.35}
+    .wrap{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:0 28px 100px}
 
-    /* Header */
-    header { padding: 60px 0 28px; border-bottom: 2px solid var(--ink); margin-bottom: 36px; }
-    .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
-    .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
-    h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 700; line-height: 1.05; color: var(--ink); }
-    h1 em { font-style: italic; font-weight: 400; color: var(--accent2); }
-    .header-formula { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); background: var(--cream); border: 1px solid var(--rule); padding: 8px 14px; border-radius: 4px; white-space: nowrap; align-self: flex-start; margin-top: 6px; }
-    .header-meta { display: flex; align-items: center; gap: 24px; margin-top: 20px; flex-wrap: wrap; }
-    .stat-chip { display: flex; align-items: baseline; gap: 5px; }
-    .stat-chip .num { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: var(--ink); }
-    .stat-chip .label { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
-    .sep { width: 1px; height: 26px; background: var(--rule); }
-    .manage-btn { display: inline-flex; align-items: center; gap: 7px; background: var(--ink); color: var(--paper); font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; transition: background .15s; margin-top: 18px; }
-    .manage-btn:hover { background: var(--accent2); }
+    header{padding:60px 0 28px;border-bottom:2px solid var(--ink);margin-bottom:36px}
+    .header-row{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px}
+    .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+    h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5vw,3.6rem);font-weight:700;line-height:1.05;color:var(--ink)}
+    h1 em{font-style:italic;font-weight:400;color:var(--accent2)}
+    .formula{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);background:var(--cream);border:1px solid var(--rule);padding:8px 14px;border-radius:4px;white-space:nowrap;align-self:flex-start;margin-top:6px}
+    .meta{display:flex;align-items:center;gap:24px;margin-top:20px;flex-wrap:wrap}
+    .chip{display:flex;align-items:baseline;gap:5px}
+    .chip .n{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--ink)}
+    .chip .l{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+    .sep{width:1px;height:26px;background:var(--rule)}
+    .admin-link{display:inline-flex;align-items:center;gap:6px;margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1.5px solid var(--rule);padding:8px 16px;border-radius:4px;transition:all .15s}
+    .admin-link:hover{color:var(--ink);border-color:var(--ink)}
 
-    /* Overlay + Panel */
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(13,17,23,.55); backdrop-filter: blur(4px); z-index: 100; align-items: center; justify-content: center; padding: 24px; }
-    .overlay.open { display: flex; }
-    .panel { background: var(--paper); border: 2px solid var(--ink); border-radius: 8px; width: 100%; max-width: 560px; max-height: 88vh; display: flex; flex-direction: column; animation: slideUp .22s ease; }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-    .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 16px; border-bottom: 1.5px solid var(--rule); }
-    .panel-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); }
-    .close-btn { background: none; border: none; font-size: 22px; color: var(--muted); cursor: pointer; padding: 2px 6px; border-radius: 3px; transition: color .15s; }
-    .close-btn:hover { color: var(--accent); }
+    .search-row{margin-bottom:28px;position:relative}
+    .search-row input{width:100%;background:var(--cream);border:1.5px solid var(--rule);border-radius:6px;padding:12px 20px 12px 44px;font-family:'IBM Plex Sans',sans-serif;font-size:.92rem;color:var(--text);outline:none;transition:border-color .2s}
+    .search-row input:focus{border-color:var(--accent2)}
+    .search-row input::placeholder{color:var(--rule)}
+    .si{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--muted);pointer-events:none}
 
-    /* Add form */
-    .add-form { padding: 20px 24px; border-bottom: 1.5px solid var(--rule); display: flex; flex-direction: column; gap: 10px; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .field { display: flex; flex-direction: column; gap: 5px; }
-    .field label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
-    .field input { background: var(--cream); border: 1.5px solid var(--rule); border-radius: 4px; padding: 9px 12px; font-family: 'IBM Plex Sans', sans-serif; font-size: .88rem; color: var(--text); outline: none; transition: border-color .18s; width: 100%; }
-    .field input:focus { border-color: var(--accent2); }
-    .field input::placeholder { color: var(--rule); }
-    .add-submit { align-self: flex-start; background: var(--green); color: #fff; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; border: none; padding: 10px 22px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: background .15s; margin-top: 4px; }
-    .add-submit:hover { background: #155e38; }
-    .form-error { font-size: .8rem; color: var(--accent); font-family: 'IBM Plex Mono', monospace; display: none; }
-    .form-error.show { display: block; }
+    .tabs{display:flex;gap:7px;margin-bottom:28px;flex-wrap:wrap}
+    .tab{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:6px 13px;border:1.5px solid var(--rule);border-radius:3px;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s}
+    .tab:hover,.tab.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 
-    /* Page list */
-    .page-list-wrap { overflow-y: auto; flex: 1; padding: 16px 24px 20px; }
-    .list-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: 10px; }
-    .page-list { display: flex; flex-direction: column; gap: 6px; }
-    .list-item { display: flex; align-items: center; gap: 12px; background: var(--cream); border: 1px solid var(--rule); border-radius: 5px; padding: 10px 14px; animation: fadeIn .2s ease; }
-    .list-item-info { flex: 1; min-width: 0; }
-    .list-item-title { font-family: 'Playfair Display', serif; font-size: .95rem; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .list-item-url { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .list-item-cat { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--accent); border: 1px solid rgba(192,57,43,.2); padding: 1px 7px; border-radius: 2px; white-space: nowrap; flex-shrink: 0; }
-    .delete-btn { background: none; border: 1px solid var(--rule); border-radius: 3px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--muted); font-size: 14px; flex-shrink: 0; transition: background .15s, color .15s, border-color .15s; }
-    .delete-btn:hover { background: rgba(192,57,43,.1); color: var(--accent); border-color: rgba(192,57,43,.3); }
-    .empty-list { text-align: center; padding: 32px; color: var(--muted); font-size: .85rem; font-style: italic; }
+    #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));border:1.5px solid var(--ink)}
+    .card{position:relative;border-right:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);padding:26px 24px 22px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:8px;background:var(--paper);opacity:0;animation:fadeIn .35s forwards;overflow:hidden}
+    .card::after{content:'';position:absolute;inset:0;background:var(--ink);transform:scaleY(0);transform-origin:bottom;transition:transform .2s cubic-bezier(.4,0,.2,1);z-index:0}
+    .card:hover::after{transform:scaleY(1)}
+    .card>*{position:relative;z-index:1}
+    .card:hover .cn,.card:hover .ct,.card:hover .cd,.card:hover .ctag,.card:hover .ca{color:var(--paper)}
+    .card:hover .ctag{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.08)}
+    .cn{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;transition:color .2s}
+    .ct{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;line-height:1.25;color:var(--ink);transition:color .2s}
+    .cd{font-size:.82rem;color:var(--muted);line-height:1.55;flex:1;transition:color .2s}
+    .cfoot{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+    .ctag{font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);border:1px solid rgba(192,57,43,.22);padding:2px 7px;border-radius:2px;background:rgba(192,57,43,.05);transition:color .2s,border-color .2s,background .2s}
+    .ca{font-size:17px;color:var(--muted);transition:color .2s,transform .2s}
+    .card:hover .ca{transform:translate(3px,-3px)}
 
-    /* Toast */
-    .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--paper); font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: .06em; padding: 10px 20px; border-radius: 4px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 200; white-space: nowrap; }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .empty{grid-column:1/-1;padding:60px;text-align:center;color:var(--muted)}
+    .empty .em{font-size:2.5rem;color:var(--rule);font-family:'Playfair Display',serif}
+    .loading{grid-column:1/-1;padding:60px;text-align:center;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.1em}
 
-    /* Search + tabs */
-    .search-row { margin-bottom: 28px; position: relative; }
-    .search-row input { width: 100%; background: var(--cream); border: 1.5px solid var(--rule); border-radius: 6px; padding: 12px 20px 12px 44px; font-family: 'IBM Plex Sans', sans-serif; font-size: .92rem; color: var(--text); outline: none; transition: border-color .2s; }
-    .search-row input:focus { border-color: var(--accent2); }
-    .search-row input::placeholder { color: var(--rule); }
-    .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--muted); pointer-events: none; }
-    .tabs { display: flex; gap: 7px; margin-bottom: 28px; flex-wrap: wrap; }
-    .tab { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; padding: 6px 13px; border: 1.5px solid var(--rule); border-radius: 3px; cursor: pointer; background: transparent; color: var(--muted); transition: all .15s; }
-    .tab:hover, .tab.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .bar{margin-top:14px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.05em}
+    footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)}
+    footer .brand{color:var(--accent2)}
 
-    /* Cards */
-    #cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); border: 1.5px solid var(--ink); }
-    .card { position: relative; border-right: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); padding: 26px 24px 22px; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 8px; background: var(--paper); opacity: 0; animation: fadeIn .35s forwards; overflow: hidden; }
-    .card::after { content: ''; position: absolute; inset: 0; background: var(--ink); transform: scaleY(0); transform-origin: bottom; transition: transform .2s cubic-bezier(.4,0,.2,1); z-index: 0; }
-    .card:hover::after { transform: scaleY(1); }
-    .card:hover .card-num, .card:hover .card-title, .card:hover .card-desc, .card:hover .card-tag, .card:hover .card-arrow { color: var(--paper); }
-    .card:hover .card-tag { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.08); }
-    .card > * { position: relative; z-index: 1; }
-    .card-num { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .15em; color: var(--muted); text-transform: uppercase; transition: color .2s; }
-    .card-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; line-height: 1.25; color: var(--ink); transition: color .2s; }
-    .card-desc { font-size: .82rem; color: var(--muted); line-height: 1.55; flex: 1; transition: color .2s; }
-    .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
-    .card-tag { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); border: 1px solid rgba(192,57,43,.22); padding: 2px 7px; border-radius: 2px; background: rgba(192,57,43,.05); transition: color .2s, border-color .2s, background .2s; }
-    .card-arrow { font-size: 17px; color: var(--muted); transition: color .2s, transform .2s; }
-    .card:hover .card-arrow { transform: translate(3px, -3px); }
-    .empty-grid { grid-column: 1/-1; padding: 60px; text-align: center; color: var(--muted); }
-    .empty-grid .em { font-size: 2.5rem; color: var(--rule); font-family: 'Playfair Display', serif; }
-    .count-bar { margin-top: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: .05em; }
-
-    footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); }
-    footer .brand { color: var(--accent2); }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    @media (max-width: 600px) { #cards-grid { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } }
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:600px){#grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-
-<canvas id="bg-canvas"></canvas>
-
-<div class="wrapper">
+<canvas id="bg"></canvas>
+<div class="wrap">
   <header>
-    <div class="header-top">
+    <div class="header-row">
       <div>
         <p class="eyebrow">Repository Index</p>
         <h1>Probability &amp;<br/><em>Statistics</em></h1>
       </div>
-      <div class="header-formula">f(x) = (1/σ√2π) · e^(-(x-μ)²/2σ²)</div>
+      <div class="formula">f(x) = (1/σ√2π) · e^(-(x-μ)²/2σ²)</div>
     </div>
-    <div class="header-meta">
-      <div class="stat-chip"><span class="num" id="total-count">0</span><span class="label">Pages</span></div>
+    <div class="meta">
+      <div class="chip"><span class="n" id="tc">—</span><span class="l">Pages</span></div>
       <div class="sep"></div>
-      <div class="stat-chip"><span class="num" id="cat-count">0</span><span class="label">Topics</span></div>
+      <div class="chip"><span class="n" id="cc">—</span><span class="l">Topics</span></div>
     </div>
-    <button class="manage-btn" id="open-panel-btn">⊕ &nbsp;Manage Pages</button>
+    <a href="admin.html" class="admin-link">⚙ Admin</a>
   </header>
 
   <div class="search-row">
-    <span class="search-icon">⌕</span>
-    <input type="text" id="search" placeholder="Search pages… e.g. Bayes, regression, CLT" />
+    <span class="si">⌕</span>
+    <input type="text" id="search" placeholder="Search… e.g. Bayes, regression, CLT"/>
   </div>
-
   <div class="tabs" id="tabs"><button class="tab active" data-cat="all">All</button></div>
-  <div id="cards-grid"></div>
-  <p class="count-bar" id="count-bar"></p>
-
+  <div id="grid"><div class="loading">Loading pages…</div></div>
+  <p class="bar" id="bar"></p>
   <footer>
-    <span>Click ⊕ Manage Pages to add or remove entries</span>
-    <span class="brand">P(A|B) = P(B|A)·P(A) / P(B)</span>
+    <span>Auto-indexed via GitHub Actions · <a href="admin.html" style="color:var(--accent2)">Admin panel →</a></span>
+    <span class="brand">P(A|B) = P(B|A)·P(A)/P(B)</span>
   </footer>
 </div>
 
-<!-- Panel -->
-<div class="overlay" id="overlay">
-  <div class="panel">
-    <div class="panel-header">
-      <span class="panel-title">Manage Pages</span>
-      <button class="close-btn" id="close-panel-btn">✕</button>
-    </div>
-    <div class="add-form">
-      <div class="form-row">
-        <div class="field"><label>Page Title *</label><input type="text" id="f-title" placeholder="Normal Distribution" /></div>
-        <div class="field"><label>URL / filename *</label><input type="text" id="f-url" placeholder="normal-distribution.html" /></div>
-      </div>
-      <div class="form-row">
-        <div class="field"><label>Category</label><input type="text" id="f-cat" placeholder="Distributions" list="cat-dl" /><datalist id="cat-dl"></datalist></div>
-        <div class="field"><label>Description</label><input type="text" id="f-desc" placeholder="Optional…" /></div>
-      </div>
-      <p class="form-error" id="form-error">Title and URL are required.</p>
-      <button class="add-submit" id="add-btn">＋ &nbsp;Add Page</button>
-    </div>
-    <div class="page-list-wrap">
-      <p class="list-label">Current pages</p>
-      <div class="page-list" id="page-list"></div>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
 <script>
-const STORAGE_KEY = 'stat-pages-v1';
-function uid() { return Math.random().toString(36).slice(2,9); }
+let pages=[], activeTab='all', query='';
 
-function loadPages() {
-  try { const r = localStorage.getItem(STORAGE_KEY); if (r) return JSON.parse(r); } catch(_) {}
-  return [
-    { id:uid(), title:"Normal Distribution",   desc:"Gaussian PDF, CDF, and key properties.",             url:"normal-distribution.html",  category:"Distributions" },
-    { id:uid(), title:"Bayes' Theorem",         desc:"Updating beliefs with conditional probability.",      url:"bayes.html",                 category:"Probability"   },
-    { id:uid(), title:"Central Limit Theorem",  desc:"Sample means converge to normality.",                url:"clt.html",                   category:"Theory"        },
-    { id:uid(), title:"Hypothesis Testing",     desc:"p-values, significance levels, and power.",          url:"hypothesis-testing.html",    category:"Inference"     },
-    { id:uid(), title:"Linear Regression",      desc:"OLS, residuals, R², and model assumptions.",         url:"regression.html",            category:"Regression"    },
-    { id:uid(), title:"Binomial Distribution",  desc:"n trials, k successes — discrete probability model.",url:"binomial.html",              category:"Distributions" },
-  ];
-}
-function save(pages) { localStorage.setItem(STORAGE_KEY, JSON.stringify(pages)); }
-
-let pages = loadPages(), activeTab = 'all', query = '';
-
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2200);
+async function load(){
+  try{
+    const r = await fetch('pages.json?v='+Date.now());
+    pages = await r.json();
+  }catch(e){ pages=[]; }
+  updateStats(); rebuildTabs(); renderGrid();
 }
 
-function updateStats() {
-  const cats = [...new Set(pages.map(p => p.category).filter(Boolean))];
-  document.getElementById('total-count').textContent = pages.length;
-  document.getElementById('cat-count').textContent   = cats.length;
+function updateStats(){
+  const cats=[...new Set(pages.map(p=>p.category).filter(Boolean))];
+  document.getElementById('tc').textContent=pages.length;
+  document.getElementById('cc').textContent=cats.length;
 }
 
-function rebuildTabs() {
-  const el   = document.getElementById('tabs');
-  const cats = [...new Set(pages.map(p => p.category).filter(Boolean))].sort();
-  el.innerHTML = `<button class="tab${activeTab==='all'?' active':''}" data-cat="all">All</button>`;
-  cats.forEach(cat => {
-    const b = document.createElement('button');
-    b.className = `tab${activeTab===cat?' active':''}`;
-    b.dataset.cat = cat; b.textContent = cat;
-    el.appendChild(b);
+function rebuildTabs(){
+  const el=document.getElementById('tabs');
+  const cats=[...new Set(pages.map(p=>p.category).filter(Boolean))].sort();
+  el.innerHTML=`<button class="tab${activeTab==='all'?' active':''}" data-cat="all">All</button>`;
+  cats.forEach(cat=>{
+    const b=document.createElement('button');
+    b.className=`tab${activeTab===cat?' active':''}`;
+    b.dataset.cat=cat; b.textContent=cat; el.appendChild(b);
   });
 }
 
-document.getElementById('tabs').addEventListener('click', e => {
-  if (!e.target.matches('.tab')) return;
-  activeTab = e.target.dataset.cat;
-  rebuildTabs(); renderGrid();
+document.getElementById('tabs').addEventListener('click',e=>{
+  if(!e.target.matches('.tab')) return;
+  activeTab=e.target.dataset.cat; rebuildTabs(); renderGrid();
 });
 
-function renderGrid() {
-  const grid = document.getElementById('cards-grid');
-  const bar  = document.getElementById('count-bar');
-  const f = pages.filter(p => {
-    const mc = activeTab==='all' || p.category===activeTab;
-    const mq = !query || p.title.toLowerCase().includes(query) || (p.desc||'').toLowerCase().includes(query) || (p.category||'').toLowerCase().includes(query);
-    return mc && mq;
+function renderGrid(){
+  const g=document.getElementById('grid'), bar=document.getElementById('bar');
+  const f=pages.filter(p=>{
+    const mc=activeTab==='all'||p.category===activeTab;
+    const mq=!query||p.title.toLowerCase().includes(query)||(p.desc||'').toLowerCase().includes(query)||(p.category||'').toLowerCase().includes(query);
+    return mc&&mq;
   });
-  grid.innerHTML = '';
-  if (!f.length) {
-    grid.innerHTML = '<div class="empty-grid"><div class="em">∅</div><p>No pages match. Try a different filter or add a new page.</p></div>';
-    bar.textContent = ''; return;
+  g.innerHTML='';
+  if(!f.length){
+    g.innerHTML='<div class="empty"><div class="em">∅</div><p>No pages found.</p></div>';
+    bar.textContent=''; return;
   }
-  f.forEach((p, i) => {
-    const a = document.createElement('a');
-    a.className = 'card'; a.href = p.url || '#';
-    a.style.animationDelay = `${i*45}ms`;
-    a.innerHTML = `
-      <span class="card-num">${String(i+1).padStart(2,'0')} / ${String(f.length).padStart(2,'0')}</span>
-      <h2 class="card-title">${p.title}</h2>
-      <p class="card-desc">${p.desc||''}</p>
-      <div class="card-footer">
-        <span class="card-tag">${p.category||'General'}</span>
-        <span class="card-arrow">↗</span>
+  f.forEach((p,i)=>{
+    const a=document.createElement('a');
+    a.className='card'; a.href=p.url||'#'; a.target='_blank';
+    a.style.animationDelay=`${i*45}ms`;
+    a.innerHTML=`
+      <span class="cn">${String(i+1).padStart(2,'0')} / ${String(f.length).padStart(2,'0')}</span>
+      <h2 class="ct">${p.title}</h2>
+      <p class="cd">${p.desc||''}</p>
+      <div class="cfoot">
+        <span class="ctag">${p.category||'General'}</span>
+        <span class="ca">↗</span>
       </div>`;
-    grid.appendChild(a);
+    g.appendChild(a);
   });
-  bar.textContent = `Showing ${f.length} of ${pages.length} pages`;
+  bar.textContent=`Showing ${f.length} of ${pages.length} pages`;
 }
 
-function renderList() {
-  const el = document.getElementById('page-list');
-  el.innerHTML = '';
-  if (!pages.length) { el.innerHTML = '<p class="empty-list">No pages yet.</p>'; return; }
-  pages.forEach(p => {
-    const row = document.createElement('div');
-    row.className = 'list-item';
-    row.innerHTML = `
-      <div class="list-item-info">
-        <div class="list-item-title">${p.title}</div>
-        <div class="list-item-url">${p.url}</div>
-      </div>
-      <span class="list-item-cat">${p.category||'—'}</span>
-      <button class="delete-btn" data-id="${p.id}" title="Remove">✕</button>`;
-    el.appendChild(row);
-  });
-  // rebuild datalist
-  const dl = document.getElementById('cat-dl');
-  dl.innerHTML = [...new Set(pages.map(p=>p.category).filter(Boolean))].map(c=>`<option value="${c}">`).join('');
-}
-
-document.getElementById('page-list').addEventListener('click', e => {
-  const btn = e.target.closest('.delete-btn');
-  if (!btn) return;
-  const p = pages.find(x => x.id === btn.dataset.id);
-  if (!p) return;
-  pages = pages.filter(x => x.id !== p.id);
-  save(pages); renderList(); rebuildTabs(); renderGrid(); updateStats();
-  toast(`"${p.title}" removed`);
-});
-
-document.getElementById('add-btn').addEventListener('click', () => {
-  const title = document.getElementById('f-title').value.trim();
-  const url   = document.getElementById('f-url').value.trim();
-  const cat   = document.getElementById('f-cat').value.trim() || 'General';
-  const desc  = document.getElementById('f-desc').value.trim();
-  const err   = document.getElementById('form-error');
-  if (!title || !url) { err.classList.add('show'); return; }
-  err.classList.remove('show');
-  pages.push({ id: uid(), title, url, category: cat, desc });
-  save(pages);
-  ['f-title','f-url','f-cat','f-desc'].forEach(id => document.getElementById(id).value = '');
-  renderList(); rebuildTabs(); renderGrid(); updateStats();
-  toast(`"${title}" added ✓`);
-});
-
-document.getElementById('search').addEventListener('input', e => { query = e.target.value.toLowerCase(); renderGrid(); });
-
-document.getElementById('open-panel-btn').addEventListener('click', () => { renderList(); document.getElementById('overlay').classList.add('open'); });
-document.getElementById('close-panel-btn').addEventListener('click', () => document.getElementById('overlay').classList.remove('open'));
-document.getElementById('overlay').addEventListener('click', e => { if (e.target.id==='overlay') document.getElementById('overlay').classList.remove('open'); });
-document.addEventListener('keydown', e => { if (e.key==='Escape') document.getElementById('overlay').classList.remove('open'); });
-
-// Init
-updateStats(); rebuildTabs(); renderGrid();
+document.getElementById('search').addEventListener('input',e=>{query=e.target.value.toLowerCase();renderGrid();});
+load();
 
 // Canvas
-const canvas = document.getElementById('bg-canvas');
-const ctx = canvas.getContext('2d');
-let W, H, t = 0;
-function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
-window.addEventListener('resize', resize); resize();
-function gauss(x,mu,s) { return Math.exp(-0.5*((x-mu)/s)**2); }
-function draw() {
+const cv=document.getElementById('bg'),ctx=cv.getContext('2d');
+let W,H,t=0;
+function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+window.addEventListener('resize',resize);resize();
+function g(x,mu,s){return Math.exp(-0.5*((x-mu)/s)**2);}
+function draw(){
   ctx.clearRect(0,0,W,H);
-  ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(100,90,70,.11)';
-  for (let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-  for (let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  ctx.strokeStyle='rgba(100,90,70,.11)';ctx.lineWidth=1;
+  for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
   [{mu:.38,s:.09,c:'rgba(44,95,138,.22)',o:0},{mu:.60,s:.14,c:'rgba(192,57,43,.14)',o:Math.PI},{mu:.50,s:.06,c:'rgba(184,150,62,.18)',o:Math.PI/2}]
-  .forEach(({mu,s,c,o}) => {
-    const sh = Math.sin(t+o)*.015;
+  .forEach(({mu,s,c,o})=>{
+    const sh=Math.sin(t+o)*.015;
     ctx.beginPath();
-    for (let px=0;px<=W;px+=2){const nx=px/W;const py=H*.78-gauss(nx,mu+sh,s)*H*.55;px===0?ctx.moveTo(px,py):ctx.lineTo(px,py);}
-    ctx.strokeStyle=c; ctx.lineWidth=2.5; ctx.stroke();
-    ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fillStyle=c.replace(/[\d.]+\)$/,'.04)');ctx.fill();
+    for(let px=0;px<=W;px+=2){const nx=px/W;const py=H*.78-g(nx,mu+sh,s)*H*.55;px===0?ctx.moveTo(px,py):ctx.lineTo(px,py);}
+    ctx.strokeStyle=c;ctx.lineWidth=2.5;ctx.stroke();
+    ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();
+    ctx.fillStyle=c.replace(/[\d.]+\)$/,'.04)');ctx.fill();
   });
-  t+=.005; requestAnimationFrame(draw);
+  t+=.005;requestAnimationFrame(draw);
 }
 draw();
 </script>
