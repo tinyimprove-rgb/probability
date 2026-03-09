@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin - Probability &amp; Statistics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0f1117;--surface:#161b25;--surface2:#1c2333;--border:#252d3d;
+      --accent:#4f8ef7;--green:#22c55e;--red:#ef4444;--yellow:#f59e0b;
+      --text:#e2e8f0;--muted:#64748b;--muted2:#94a3b8;
+    }
+    body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;min-height:100vh}
+    .layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+
+    /* Sidebar */
+    .sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column}
+    .sb-head{padding:24px 20px 18px;border-bottom:1px solid var(--border)}
+    .sb-logo{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:5px}
+    .sb-name{font-size:1rem;font-weight:600;color:var(--text)}
+    .sb-url{font-size:.7rem;color:var(--muted);margin-top:2px;word-break:break-all}
+    .sb-nav{padding:14px 10px;display:flex;flex-direction:column;gap:3px}
+    .nav-item{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:6px;font-size:.83rem;color:var(--muted2);cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:all .15s}
+    .nav-item:hover{background:var(--surface2);color:var(--text)}
+    .nav-item.active{background:rgba(79,142,247,.12);color:var(--accent)}
+    .sb-foot{margin-top:auto;padding:14px 20px;border-top:1px solid var(--border)}
+    .back-link{display:flex;align-items:center;gap:7px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .15s}
+    .back-link:hover{color:var(--text)}
+
+    /* Main */
+    .main{display:flex;flex-direction:column;overflow-y:auto}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--border);background:var(--surface);gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:10}
+    .topbar-left{display:flex;flex-direction:column;gap:3px}
+    .topbar-title{font-size:.95rem;font-weight:600;color:var(--text)}
+    .topbar-meta{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted)}
+    .topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-size:.78rem;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'IBM Plex Sans',sans-serif;white-space:nowrap}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover:not(:disabled){background:#3a7de0}
+    .btn-green{background:var(--green);color:#000;font-weight:600}.btn-green:hover:not(:disabled){background:#16a34a;color:#fff}
+    .btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border)}.btn-ghost:hover:not(:disabled){background:var(--surface2);color:var(--text)}
+    .btn-danger{background:transparent;color:var(--red);border:1px solid rgba(239,68,68,.25)}.btn-danger:hover:not(:disabled){background:rgba(239,68,68,.1)}
+    .btn-sm{padding:4px 10px;font-size:.72rem}
+
+    /* Panels */
+    .panel{padding:28px;display:none}
+    .panel.active{display:block}
+
+    /* Cards */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:20px}
+    .card-title{font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:6px}
+    .card-desc{font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:16px}
+    .card-desc a{color:var(--accent)}
+
+    /* Form */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+    .field{display:flex;flex-direction:column;gap:5px}
+    .field label{font-family:'IBM Plex Mono',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+    .field input,.field select,.field textarea{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;font-family:'IBM Plex Sans',sans-serif;font-size:.83rem;color:var(--text);outline:none;transition:border-color .18s;width:100%}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+    .field input::placeholder{color:var(--muted)}
+    .field-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+
+    /* Status badge */
+    .status-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;border:1px solid}
+    .status-badge.connected{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:var(--green)}
+    .status-badge.syncing{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);color:var(--yellow)}
+    .status-badge.error{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:var(--red)}
+    .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+    /* Error text */
+    .err-text{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--red);margin-top:8px;display:none}
+    .err-text.show{display:block}
+
+    /* Upload zone */
+    .upload-zone{border:2px dashed var(--border);border-radius:12px;padding:44px 28px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--surface)}
+    .upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:rgba(79,142,247,.04)}
+    .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .upload-icon{font-size:2.2rem;margin-bottom:10px}
+    .upload-title{font-size:.95rem;font-weight:600;color:var(--text);margin-bottom:5px}
+    .upload-hint{font-size:.78rem;color:var(--muted)}
+    .upload-hint code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--accent)}
+
+    /* Queue */
+    .queue{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+    .qi{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+    .qi-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .qi-name{font-size:.85rem;font-weight:500;color:var(--text)}
+    .qi-size{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--muted)}
+    .qi-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+    .qi-fields input{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:6px 10px;font-size:.78rem;color:var(--text);outline:none;font-family:'IBM Plex Sans',sans-serif;transition:border-color .15s;width:100%}
+    .qi-fields input:focus{border-color:var(--accent)}
+    .qi-fields input::placeholder{color:var(--muted)}
+    .progress{width:100%;height:3px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden}
+    .progress-bar{height:100%;width:0%;transition:width .4s,background .2s;border-radius:2px;background:var(--accent)}
+    .progress-bar.done{background:var(--green);width:100%}
+    .progress-bar.fail{background:var(--red);width:100%}
+    .queue-actions{display:flex;align-items:center;gap:10px;margin-top:12px}
+
+    /* Stats */
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:22px}
+    .stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+    .stat-n{font-family:'IBM Plex Mono',monospace;font-size:1.4rem;font-weight:600;color:var(--text)}
+    .stat-l{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-top:2px}
+    .stat.blue .stat-n{color:var(--accent)}.stat.green .stat-n{color:var(--green)}.stat.yellow .stat-n{color:var(--yellow)}
+
+    /* Table */
+    .sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .sec-title{font-family:'IBM Plex Mono',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+    .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+    .table-search{padding:11px 14px;border-bottom:1px solid var(--border)}
+    .table-search input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 12px;font-size:.82rem;color:var(--text);outline:none;font-family:'IBM Plex Sans',sans-serif;transition:border-color .15s}
+    .table-search input:focus{border-color:var(--accent)}
+    .table-search input::placeholder{color:var(--muted)}
+    table{width:100%;border-collapse:collapse}
+    thead tr{background:var(--surface2)}
+    th{padding:10px 14px;text-align:left;font-family:'IBM Plex Mono',monospace;font-size:.63rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);border-bottom:1px solid var(--border)}
+    td{padding:11px 14px;font-size:.82rem;border-bottom:1px solid var(--border);vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    tr.row:hover td{background:rgba(255,255,255,.015)}
+    .td-name{font-weight:500;color:var(--text)}
+    .td-auto{font-size:.63rem;color:var(--green);font-family:'IBM Plex Mono',monospace;margin-top:2px}
+    .td-url{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--accent)}
+    .td-url a{color:inherit;text-decoration:none}.td-url a:hover{text-decoration:underline}
+    .badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:3px;border:1px solid}
+    .b-blue{background:rgba(79,142,247,.1);color:var(--accent);border-color:rgba(79,142,247,.25)}
+    .b-green{background:rgba(34,197,94,.08);color:var(--green);border-color:rgba(34,197,94,.2)}
+    .b-yellow{background:rgba(245,158,11,.08);color:var(--yellow);border-color:rgba(245,158,11,.2)}
+    .b-gray{background:rgba(100,116,139,.1);color:var(--muted2);border-color:var(--border)}
+    .td-date{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--muted);white-space:nowrap}
+    .td-act{display:flex;gap:6px;align-items:center}
+    .empty-row{padding:40px;text-align:center;color:var(--muted);font-size:.83rem}
+
+    /* Modal */
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:24px}
+    .overlay.open{display:flex}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:10px;width:100%;max-width:460px;animation:su .2s ease}
+    @keyframes su{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 14px;border-bottom:1px solid var(--border)}
+    .modal-title{font-size:.9rem;font-weight:600;color:var(--text)}
+    .modal-x{background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:2px 5px;border-radius:3px;transition:color .15s}.modal-x:hover{color:var(--text)}
+    .modal-body{padding:20px 22px;display:flex;flex-direction:column;gap:11px}
+    .modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+    /* Toast */
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.05em;padding:9px 18px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:400;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.ok{border-color:rgba(34,197,94,.4);color:var(--green)}
+    .toast.fail{border-color:rgba(239,68,68,.4);color:var(--red)}
+
+    /* JSON */
+    .json-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:18px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted2);white-space:pre-wrap;word-break:break-all;max-height:500px;overflow-y:auto;line-height:1.6}
+
+    /* Help */
+    .how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px}
+    .how-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px}
+    .how-n{font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--accent);margin-bottom:6px;letter-spacing:.1em}
+    .how-t{font-size:.83rem;font-weight:600;color:var(--text);margin-bottom:3px}
+    .how-d{font-size:.75rem;color:var(--muted);line-height:1.5}
+    .code-block{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:12px 14px;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted2);line-height:1.7;margin-top:10px}
+
+    @media(max-width:780px){.layout{grid-template-columns:1fr}.sidebar{display:none}.qi-fields{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sb-head">
+      <div class="sb-logo">Admin Panel</div>
+      <div class="sb-name">Prob &amp; Stats</div>
+      <div class="sb-url">tinyimprove-rgb.github.io/probability</div>
+    </div>
+    <nav class="sb-nav">
+      <button class="nav-item active" onclick="switchPanel('upload',this)">Upload Pages</button>
+      <button class="nav-item" onclick="switchPanel('manage',this)">Manage Pages</button>
+      <button class="nav-item" onclick="switchPanel('json',this)">JSON Data</button>
+      <button class="nav-item" onclick="switchPanel('help',this)">How It Works</button>
+    </nav>
+    <div class="sb-foot">
+      <a href="index.html" class="back-link">Back to site</a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title" id="topbar-title">Upload Pages</div>
+        <div class="topbar-meta" id="topbar-meta">Connect GitHub to get started</div>
+      </div>
+      <div class="topbar-right">
+        <div id="sync-badge" style="display:none" class="status-badge connected"><span class="dot"></span><span id="sync-text">Connected</span></div>
+        <a href="index.html" class="btn btn-ghost">View Site</a>
+      </div>
+    </div>
+
+    <!-- UPLOAD PANEL -->
+    <div class="panel active" id="panel-upload">
+
+      <div class="card" id="setup-card">
+        <div class="card-title">GitHub Connection</div>
+        <div class="card-desc">
+          Enter a GitHub Personal Access Token to upload files to your repo.<br/>
+          <a href="https://github.com/settings/tokens/new?scopes=repo&description=ProbStats+Admin" target="_blank">Click here to generate a token</a> - make sure to tick the <strong>repo</strong> scope. Your token is saved in your browser only.
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Personal Access Token</label>
+            <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"/>
+          </div>
+          <button class="btn btn-primary" id="connect-btn" onclick="connectGitHub()">Connect</button>
+        </div>
+        <div class="err-text" id="connect-error"></div>
+      </div>
+
+      <div id="upload-section" style="display:none">
+        <div class="upload-zone" id="drop-zone">
+          <input type="file" id="file-input" accept=".html" multiple/>
+          <div class="upload-icon">&#128193;</div>
+          <div class="upload-title">Drop HTML files here</div>
+          <div class="upload-hint">or click to browse &middot; accepts <code>.html</code> files &middot; uploads directly to GitHub</div>
+        </div>
+        <div class="queue" id="queue"></div>
+        <div class="queue-actions" id="queue-actions" style="display:none">
+          <button class="btn btn-green" id="upload-btn" onclick="uploadAll()">Upload All to GitHub</button>
+          <button class="btn btn-ghost" onclick="clearQueue()">Clear</button>
+          <span id="queue-count" style="font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted)"></span>
+        </div>
+      </div>
+
+      <div id="log-section" style="display:none;margin-top:24px">
+        <div class="sec-hdr">
+          <span class="sec-title">Upload Log</span>
+          <button class="btn btn-ghost btn-sm" onclick="clearLog()">Clear</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>File</th><th>URL</th><th>Status</th><th>Time</th></tr></thead>
+            <tbody id="log-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MANAGE PANEL -->
+    <div class="panel" id="panel-manage">
+      <div class="stats" id="stats-row"></div>
+      <div class="card">
+        <div class="card-title">Add Page Manually</div>
+        <div class="form-grid">
+          <div class="field"><label>Title *</label><input type="text" id="m-title" placeholder="Normal Distribution"/></div>
+          <div class="field"><label>Filename *</label><input type="text" id="m-file" placeholder="normal-distribution.html"/></div>
+          <div class="field"><label>Category</label><input type="text" id="m-cat" placeholder="Distributions" list="cat-dl"/><datalist id="cat-dl"></datalist></div>
+          <div class="field"><label>Description</label><input type="text" id="m-desc" placeholder="Optional description"/></div>
+        </div>
+        <div class="err-text" id="m-err">Title and filename are required.</div>
+        <button class="btn btn-primary" onclick="manualAdd()">Add Page</button>
+      </div>
+      <div class="sec-hdr">
+        <span class="sec-title">All Pages</span>
+        <span id="page-count" style="font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--muted)"></span>
+      </div>
+      <div class="table-wrap">
+        <div class="table-search"><input type="text" id="tbl-search" placeholder="Filter pages..." oninput="renderTable()"/></div>
+        <table>
+          <thead><tr><th>Title</th><th>URL</th><th>Category</th><th>Added</th><th>Actions</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- JSON PANEL -->
+    <div class="panel" id="panel-json">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <span class="sec-title">pages.json</span>
+        <button class="btn btn-ghost btn-sm" onclick="copyJson()">Copy</button>
+      </div>
+      <pre class="json-box" id="json-box"></pre>
+      <p style="margin-top:10px;font-size:.75rem;color:var(--muted)">This file is committed to your repo automatically. Any changes made in this admin are pushed live immediately.</p>
+    </div>
+
+    <!-- HELP PANEL -->
+    <div class="panel" id="panel-help">
+      <div class="how-grid">
+        <div class="how-card"><div class="how-n">STEP 01</div><div class="how-t">Connect GitHub</div><div class="how-d">Enter a Personal Access Token with repo scope in the Upload panel.</div></div>
+        <div class="how-card"><div class="how-n">STEP 02</div><div class="how-t">Drop HTML files</div><div class="how-d">Drag and drop or click to pick .html files. Fill in title and category.</div></div>
+        <div class="how-card"><div class="how-n">STEP 03</div><div class="how-t">Upload to GitHub</div><div class="how-d">Files are pushed directly to your repo. No git client needed.</div></div>
+        <div class="how-card"><div class="how-n">STEP 04</div><div class="how-t">Index updates</div><div class="how-d">pages.json is committed and index.html reflects your new page instantly.</div></div>
+      </div>
+      <div class="sec-title" style="margin-bottom:12px">One-time repo setup</div>
+      <div class="table-wrap" style="margin-bottom:20px">
+        <table>
+          <thead><tr><th>Step</th><th>Where</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr class="row"><td>1</td><td>Settings - Pages</td><td>Deploy from branch - main - / (root)</td></tr>
+            <tr class="row"><td>2</td><td>Settings - Actions - General</td><td>Workflow permissions - Read and write</td></tr>
+            <tr class="row"><td>3</td><td>Push once</td><td>index.html, admin.html, pages.json, .github/, scripts/</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sec-title" style="margin-bottom:10px">Add metadata to your HTML pages</div>
+      <div class="code-block">&lt;title&gt;Normal Distribution&lt;/title&gt;
+&lt;meta name="description" content="Gaussian PDF, CDF, and key properties."&gt;</div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="overlay" id="edit-overlay">
+  <div class="modal">
+    <div class="modal-hdr"><span class="modal-title">Edit Page</span><button class="modal-x" onclick="closeEdit()">X</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="e-id"/>
+      <div class="field"><label>Title</label><input type="text" id="e-title"/></div>
+      <div class="field"><label>Filename</label><input type="text" id="e-file"/></div>
+      <div class="field"><label>Category</label><input type="text" id="e-cat" list="e-cat-dl"/><datalist id="e-cat-dl"></datalist></div>
+      <div class="field"><label>Description</label><input type="text" id="e-desc"/></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeEdit()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var REPO_OWNER = 'tinyimprove-rgb';
+var REPO_NAME  = 'probability';
+var BRANCH     = 'main';
+var BASE_URL   = 'https://' + REPO_OWNER + '.github.io/' + REPO_NAME + '/';
+var API_BASE   = 'https://api.github.com/repos/' + REPO_OWNER + '/' + REPO_NAME;
+var STORE_KEY  = 'prob-pages-v3';
+var TOKEN_KEY  = 'prob-token-v1';
+
+var pages = [];
+var token = '';
+var queue = [];
+var uploadLog = [];
+
+// ---- helpers ----
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+function showToast(msg, type) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' ' + type : '');
+  setTimeout(function() { el.className = 'toast'; }, 2600);
+}
+
+function authH() {
+  return {
+    'Authorization': 'Bearer ' + token,
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json'
+  };
+}
+
+function setSyncBadge(state, msg) {
+  var badge = document.getElementById('sync-badge');
+  var text  = document.getElementById('sync-text');
+  badge.style.display = 'inline-flex';
+  badge.className = 'status-badge ' + state;
+  text.textContent = msg || state;
+}
+
+// ---- connect ----
+function connectGitHub() {
+  var t    = document.getElementById('gh-token').value.trim();
+  var errEl = document.getElementById('connect-error');
+  var btn  = document.getElementById('connect-btn');
+
+  errEl.className = 'err-text';
+  errEl.textContent = '';
+
+  if (!t) {
+    errEl.textContent = 'Please enter your token.';
+    errEl.className = 'err-text show';
+    return;
+  }
+
+  btn.textContent = 'Connecting...';
+  btn.disabled = true;
+
+  fetch('https://api.github.com/user', {
+    headers: {
+      'Authorization': 'Bearer ' + t,
+      'Accept': 'application/vnd.github.v3+json'
+    }
+  })
+  .then(function(r) {
+    if (r.status === 401) throw new Error('Token is invalid or expired. Please generate a new one.');
+    if (r.status === 403) throw new Error('Token is missing the "repo" scope. Please regenerate with repo access.');
+    if (!r.ok) throw new Error('GitHub returned status ' + r.status + '. Please try again.');
+    return r.json();
+  })
+  .then(function(user) {
+    token = t;
+    localStorage.setItem(TOKEN_KEY, token);
+    showConnected(user.login);
+    showToast('Connected as ' + user.login, 'ok');
+  })
+  .catch(function(e) {
+    errEl.textContent = e.message || 'Connection failed. Check your internet and try again.';
+    errEl.className = 'err-text show';
+    btn.textContent = 'Connect';
+    btn.disabled = false;
+  });
+}
+
+function showConnected(username) {
+  document.getElementById('setup-card').style.display = 'none';
+  document.getElementById('upload-section').style.display = 'block';
+  setSyncBadge('connected', username ? 'Connected: ' + username : 'Connected');
+  document.getElementById('topbar-meta').textContent = REPO_OWNER + '/' + REPO_NAME + ' - ' + BRANCH;
+}
+
+// ---- load pages ----
+function loadPages() {
+  fetch('pages.json?v=' + Date.now())
+    .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+    .then(function(data) {
+      pages = data;
+      localStorage.setItem(STORE_KEY, JSON.stringify(pages));
+      renderAll();
+    })
+    .catch(function() {
+      try { var s = localStorage.getItem(STORE_KEY); if (s) pages = JSON.parse(s); } catch(e) {}
+      renderAll();
+    });
+}
+
+// ---- push pages.json to GitHub ----
+function pushPages(commitMsg) {
+  if (!token) return Promise.resolve();
+  setSyncBadge('syncing', 'Saving...');
+
+  var content = btoa(unescape(encodeURIComponent(JSON.stringify(pages, null, 2))));
+
+  return fetch(API_BASE + '/contents/pages.json', { headers: authH() })
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(existing) {
+      var body = {
+        message: commitMsg || 'Update pages.json via admin',
+        content: content,
+        branch: BRANCH
+      };
+      if (existing && existing.sha) body.sha = existing.sha;
+      return fetch(API_BASE + '/contents/pages.json', {
+        method: 'PUT',
+        headers: authH(),
+        body: JSON.stringify(body)
+      });
+    })
+    .then(function(r) {
+      if (!r.ok) return r.json().then(function(e) { throw new Error(e.message); });
+      localStorage.setItem(STORE_KEY, JSON.stringify(pages));
+      setSyncBadge('connected', 'Saved');
+      setTimeout(function() { setSyncBadge('connected', token ? 'Connected' : ''); }, 2000);
+    })
+    .catch(function(e) {
+      setSyncBadge('error', 'Save failed');
+      showToast('Failed to save: ' + e.message, 'fail');
+    });
+}
+
+// ---- drag & drop ----
+var dropZone = document.getElementById('drop-zone');
+var fileInput = document.getElementById('file-input');
+
+dropZone.addEventListener('dragover', function(e) {
+  e.preventDefault();
+  dropZone.classList.add('drag-over');
+});
+dropZone.addEventListener('dragleave', function() {
+  dropZone.classList.remove('drag-over');
+});
+dropZone.addEventListener('drop', function(e) {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  var files = Array.from(e.dataTransfer.files).filter(function(f) { return f.name.endsWith('.html'); });
+  addToQueue(files);
+});
+fileInput.addEventListener('change', function(e) {
+  var files = Array.from(e.target.files).filter(function(f) { return f.name.endsWith('.html'); });
+  addToQueue(files);
+  fileInput.value = '';
+});
+
+function titleFromFilename(name) {
+  return name.replace('.html', '').replace(/[-_]/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+}
+
+function addToQueue(files) {
+  files.forEach(function(file) {
+    if (queue.find(function(q) { return q.file.name === file.name; })) return;
+    queue.push({
+      id: uid(),
+      file: file,
+      title: titleFromFilename(file.name),
+      category: '',
+      desc: '',
+      status: 'pending'
+    });
+  });
+  renderQueue();
+}
+
+function renderQueue() {
+  var el   = document.getElementById('queue');
+  var acts = document.getElementById('queue-actions');
+  var cnt  = document.getElementById('queue-count');
+  if (!queue.length) { el.innerHTML = ''; acts.style.display = 'none'; return; }
+  acts.style.display = 'flex';
+  cnt.textContent = queue.length + ' file' + (queue.length > 1 ? 's' : '') + ' queued';
+  el.innerHTML = queue.map(function(q) {
+    var kb = (q.file.size / 1024).toFixed(1);
+    var statusColors = { pending: '', uploading: 'var(--yellow)', done: 'var(--green)', error: 'var(--red)' };
+    var statusLabels = { pending: 'Pending', uploading: 'Uploading...', done: 'Done', error: 'Error' };
+    return '<div class="qi" id="qi-' + q.id + '">' +
+      '<div class="qi-top">' +
+        '<div>' +
+          '<div class="qi-name">' + q.file.name + '</div>' +
+          '<div class="qi-size">' + kb + ' KB</div>' +
+        '</div>' +
+        '<span id="qstatus-' + q.id + '" style="margin-left:auto;font-family:IBM Plex Mono,monospace;font-size:.72rem;color:' + (statusColors[q.status] || 'var(--muted)') + '">' + statusLabels[q.status] + '</span>' +
+        '<button onclick="removeFromQueue(\'' + q.id + '\')" class="btn btn-ghost btn-sm">X</button>' +
+      '</div>' +
+      '<div class="qi-fields">' +
+        '<input placeholder="Title" value="' + q.title + '" oninput="updateQ(\'' + q.id + '\',\'title\',this.value)"/>' +
+        '<input placeholder="Category" value="' + q.category + '" oninput="updateQ(\'' + q.id + '\',\'category\',this.value)" list="cat-dl"/>' +
+        '<input placeholder="Description (optional)" value="' + q.desc + '" oninput="updateQ(\'' + q.id + '\',\'desc\',this.value)"/>' +
+      '</div>' +
+      '<div class="progress"><div class="progress-bar" id="prog-' + q.id + '"></div></div>' +
+    '</div>';
+  }).join('');
+}
+
+function updateQ(id, key, val) { var q = queue.find(function(x) { return x.id === id; }); if (q) q[key] = val; }
+function removeFromQueue(id) { queue = queue.filter(function(x) { return x.id !== id; }); renderQueue(); }
+function clearQueue() { queue = queue.filter(function(x) { return x.status === 'uploading'; }); renderQueue(); }
+
+function setQStatus(id, status, msg) {
+  var statusColors = { pending: 'var(--muted)', uploading: 'var(--yellow)', done: 'var(--green)', error: 'var(--red)' };
+  var statusLabels = { pending: 'Pending', uploading: 'Uploading...', done: 'Done', error: 'Error' };
+  var lbl = document.getElementById('qstatus-' + id);
+  var prg = document.getElementById('prog-' + id);
+  if (lbl) {
+    lbl.style.color = statusColors[status] || 'var(--muted)';
+    lbl.textContent = (msg ? msg : statusLabels[status]) || status;
+  }
+  if (prg) {
+    prg.style.width = (status === 'done' || status === 'error') ? '100%' : '55%';
+    prg.className = 'progress-bar' + (status === 'done' ? ' done' : status === 'error' ? ' fail' : '');
+  }
+}
+
+function readBase64(file) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function() { resolve(reader.result.split(',')[1]); };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function uploadAll() {
+  if (!token) { showToast('Connect GitHub first', 'fail'); return; }
+  var pending = queue.filter(function(q) { return q.status === 'pending'; });
+  if (!pending.length) { showToast('No files to upload', 'fail'); return; }
+
+  var btn = document.getElementById('upload-btn');
+  btn.disabled = true;
+  document.getElementById('log-section').style.display = 'block';
+
+  var chain = Promise.resolve();
+  pending.forEach(function(q) {
+    chain = chain.then(function() { return uploadOne(q); });
+  });
+  chain.then(function() {
+    btn.disabled = false;
+    renderTable();
+    renderLog();
+  });
+}
+
+function uploadOne(q) {
+  q.status = 'uploading';
+  setQStatus(q.id, 'uploading');
+
+  return readBase64(q.file)
+    .then(function(content) {
+      // Check for existing file SHA
+      return fetch(API_BASE + '/contents/' + q.file.name, { headers: authH() })
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(existing) {
+          var body = {
+            message: 'Add ' + q.file.name,
+            content: content,
+            branch: BRANCH
+          };
+          if (existing && existing.sha) body.sha = existing.sha;
+          return fetch(API_BASE + '/contents/' + q.file.name, {
+            method: 'PUT',
+            headers: authH(),
+            body: JSON.stringify(body)
+          });
+        });
+    })
+    .then(function(r) {
+      if (!r.ok) return r.json().then(function(e) { throw new Error(e.message || 'Upload failed'); });
+
+      q.status = 'done';
+      setQStatus(q.id, 'done');
+
+      // Add to pages list if not already there
+      if (!pages.find(function(p) { return p.filename === q.file.name; })) {
+        pages.unshift({
+          id: uid(),
+          title: q.title || titleFromFilename(q.file.name),
+          filename: q.file.name,
+          url: BASE_URL + q.file.name,
+          category: q.category || 'Uncategorized',
+          desc: q.desc || '',
+          added: new Date().toISOString().slice(0, 10),
+          autoAdded: false
+        });
+      }
+
+      uploadLog.unshift({ file: q.file.name, url: BASE_URL + q.file.name, status: 'done', time: new Date().toLocaleTimeString() });
+      showToast(q.file.name + ' uploaded', 'ok');
+      return pushPages('Add ' + q.file.name + ' to index');
+    })
+    .catch(function(e) {
+      q.status = 'error';
+      setQStatus(q.id, 'error', e.message);
+      uploadLog.unshift({ file: q.file.name, url: '', status: 'error', time: new Date().toLocaleTimeString(), err: e.message });
+      showToast('Upload failed: ' + e.message, 'fail');
+    });
+}
+
+function renderLog() {
+  var tb = document.getElementById('log-body');
+  if (!tb) return;
+  tb.innerHTML = uploadLog.map(function(l) {
+    return '<tr class="row">' +
+      '<td class="td-name">' + l.file + '</td>' +
+      '<td class="td-url">' + (l.url ? '<a href="' + l.url + '" target="_blank">' + l.url + '</a>' : (l.err || '-')) + '</td>' +
+      '<td><span class="badge ' + (l.status === 'done' ? 'b-green' : 'b-gray') + '">' + l.status + '</span></td>' +
+      '<td class="td-date">' + l.time + '</td>' +
+    '</tr>';
+  }).join('');
+}
+function clearLog() { uploadLog = []; renderLog(); document.getElementById('log-section').style.display = 'none'; }
+
+// ---- manage ----
+function catBadge(c) {
+  if (!c || c === 'Uncategorized') return '<span class="badge b-gray">' + (c || '-') + '</span>';
+  var m = { Distributions:'b-blue', Probability:'b-blue', Theory:'b-yellow', Inference:'b-green', Regression:'b-green', Stochastic:'b-yellow' };
+  return '<span class="badge ' + (m[c] || 'b-blue') + '">' + c + '</span>';
+}
+
+function renderTable() {
+  var q  = (document.getElementById('tbl-search') || { value: '' }).value.toLowerCase();
+  var tb = document.getElementById('tbody');
+  var cnt = document.getElementById('page-count');
+  if (!tb) return;
+  var f = pages.filter(function(p) {
+    return !q || p.title.toLowerCase().includes(q) || (p.category || '').toLowerCase().includes(q) || p.filename.toLowerCase().includes(q);
+  });
+  if (cnt) cnt.textContent = f.length + ' of ' + pages.length;
+  if (!f.length) { tb.innerHTML = '<tr><td colspan="5" class="empty-row">No pages yet.</td></tr>'; return; }
+  tb.innerHTML = f.map(function(p) {
+    return '<tr class="row">' +
+      '<td><div class="td-name">' + p.title + '</div>' + (p.autoAdded ? '<div class="td-auto">auto-indexed</div>' : '') + '</td>' +
+      '<td><div class="td-url"><a href="' + p.url + '" target="_blank">' + p.filename + '</a></div></td>' +
+      '<td>' + catBadge(p.category) + '</td>' +
+      '<td class="td-date">' + (p.added || '-') + '</td>' +
+      '<td><div class="td-act">' +
+        '<button class="btn btn-ghost btn-sm" onclick="openEdit(\'' + p.id + '\')">Edit</button>' +
+        '<button class="btn btn-danger btn-sm" onclick="deletePage(\'' + p.id + '\')">Remove</button>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('');
+
+  // rebuild datalists
+  var cats = Array.from(new Set(pages.map(function(p) { return p.category; }).filter(Boolean)));
+  ['cat-dl', 'e-cat-dl'].forEach(function(id) {
+    var dl = document.getElementById(id);
+    if (dl) dl.innerHTML = cats.map(function(c) { return '<option value="' + c + '">'; }).join('');
+  });
+}
+
+function renderStats() {
+  var cats = Array.from(new Set(pages.map(function(p) { return p.category; }).filter(Boolean)));
+  var auto = pages.filter(function(p) { return p.autoAdded; }).length;
+  var el = document.getElementById('stats-row');
+  if (el) el.innerHTML =
+    '<div class="stat blue"><div class="stat-n">' + pages.length + '</div><div class="stat-l">Total Pages</div></div>' +
+    '<div class="stat"><div class="stat-n">' + cats.length + '</div><div class="stat-l">Categories</div></div>' +
+    '<div class="stat green"><div class="stat-n">' + auto + '</div><div class="stat-l">Auto-indexed</div></div>' +
+    '<div class="stat yellow"><div class="stat-n">' + (pages.length - auto) + '</div><div class="stat-l">Manual</div></div>';
+}
+
+function manualAdd() {
+  var title = document.getElementById('m-title').value.trim();
+  var file  = document.getElementById('m-file').value.trim();
+  var cat   = document.getElementById('m-cat').value.trim() || 'General';
+  var desc  = document.getElementById('m-desc').value.trim();
+  var errEl = document.getElementById('m-err');
+  if (!title || !file) { errEl.className = 'err-text show'; return; }
+  errEl.className = 'err-text';
+  pages.unshift({ id: uid(), title: title, filename: file, url: BASE_URL + file, category: cat, desc: desc, added: new Date().toISOString().slice(0, 10), autoAdded: false });
+  ['m-title','m-file','m-cat','m-desc'].forEach(function(id) { document.getElementById(id).value = ''; });
+  renderAll();
+  pushPages('Add ' + title + ' to pages');
+  showToast(title + ' added', 'ok');
+}
+
+function deletePage(id) {
+  var p = pages.find(function(x) { return x.id === id; });
+  if (!p || !confirm('Remove "' + p.title + '" from the index?')) return;
+  pages = pages.filter(function(x) { return x.id !== id; });
+  renderAll();
+  pushPages('Remove ' + p.title + ' from pages');
+  showToast(p.title + ' removed', 'fail');
+}
+
+function openEdit(id) {
+  var p = pages.find(function(x) { return x.id === id; });
+  if (!p) return;
+  document.getElementById('e-id').value    = id;
+  document.getElementById('e-title').value = p.title;
+  document.getElementById('e-file').value  = p.filename;
+  document.getElementById('e-cat').value   = p.category || '';
+  document.getElementById('e-desc').value  = p.desc || '';
+  document.getElementById('edit-overlay').classList.add('open');
+}
+function closeEdit() { document.getElementById('edit-overlay').classList.remove('open'); }
+function saveEdit() {
+  var id    = document.getElementById('e-id').value;
+  var title = document.getElementById('e-title').value.trim();
+  var file  = document.getElementById('e-file').value.trim();
+  var cat   = document.getElementById('e-cat').value.trim();
+  var desc  = document.getElementById('e-desc').value.trim();
+  if (!title || !file) { showToast('Title and filename required', 'fail'); return; }
+  pages = pages.map(function(p) {
+    return p.id === id ? { id: p.id, title: title, filename: file, url: BASE_URL + file, category: cat, desc: desc, added: p.added, autoAdded: p.autoAdded } : p;
+  });
+  closeEdit();
+  renderAll();
+  pushPages('Edit ' + title);
+  showToast('Saved', 'ok');
+}
+
+document.getElementById('edit-overlay').addEventListener('click', function(e) { if (e.target.id === 'edit-overlay') closeEdit(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeEdit(); });
+
+// ---- panel switch ----
+function switchPanel(name, btn) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('panel-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  var titles = { upload: 'Upload Pages', manage: 'Manage Pages', json: 'JSON Data', help: 'How It Works' };
+  document.getElementById('topbar-title').textContent = titles[name] || name;
+  if (name === 'json') document.getElementById('json-box').textContent = JSON.stringify(pages, null, 2);
+  if (name === 'manage') renderAll();
+}
+
+function copyJson() {
+  navigator.clipboard.writeText(JSON.stringify(pages, null, 2))
+    .then(function() { showToast('JSON copied', 'ok'); })
+    .catch(function() { showToast('Copy failed', 'fail'); });
+}
+
+function renderAll() { renderStats(); renderTable(); }
+
+// ---- init ----
+token = localStorage.getItem(TOKEN_KEY) || '';
+if (token) { showConnected(); }
+loadPages();
+</script>
+</body>
+</html>
