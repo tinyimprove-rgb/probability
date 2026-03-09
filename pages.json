@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "id": "mmjizoxjaeaz",
+    "title": "Bertrand Paradox",
+    "filename": "Bertrand Paradox.html",
+    "url": "https://tinyimprove-rgb.github.io/probability/Bertrand Paradox.html",
+    "category": "Probability",
+    "desc": "",
+    "added": "2026-03-09",
+    "autoAdded": false
+  },
+  {
+    "id": "demo1",
+    "title": "Normal Distribution",
+    "desc": "Gaussian PDF, CDF, and key properties.",
+    "url": "https://tinyimprove-rgb.github.io/probability/normal-distribution.html",
+    "filename": "normal-distribution.html",
+    "category": "Distributions",
+    "added": "2024-01-01"
+  },
+  {
+    "id": "demo2",
+    "title": "Bayes' Theorem",
+    "desc": "Updating beliefs with conditional probability.",
+    "url": "https://tinyimprove-rgb.github.io/probability/bayes.html",
+    "filename": "bayes.html",
+    "category": "Probability",
+    "added": "2024-01-02"
+  }
+]
