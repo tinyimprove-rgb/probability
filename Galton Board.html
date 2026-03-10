@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galton Board</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#1a1a2e; color:#eee;
+    font-family:'Inter',sans-serif;
+    display:flex; flex-direction:column; align-items:center;
+    min-height:100vh; padding:20px 12px 40px;
+  }
+  h1 { font-size:1.7rem; font-weight:700; color:#fff; text-align:center; }
+  .sub { font-size:0.72rem; color:#8888bb; text-align:center; margin:4px 0 18px; letter-spacing:0.08em; text-transform:uppercase; }
+  .wrap { width:100%; max-width:680px; display:flex; flex-direction:column; gap:14px; }
+  .board-card {
+    background:#16213e; border-radius:18px; border:1px solid #2a2a50;
+    padding:18px 16px 14px;
+    display:flex; flex-direction:column; align-items:center; gap:12px;
+    box-shadow:0 8px 40px #0008;
+  }
+  canvas { border-radius:10px; display:block; width:100%; }
+  .btns { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; align-items:center; }
+  button {
+    font-family:'Inter',sans-serif; font-weight:600;
+    font-size:0.78rem; letter-spacing:0.05em;
+    padding:9px 22px; border-radius:30px; cursor:pointer;
+    border:none; transition:all 0.15s; text-transform:uppercase;
+  }
+  .btn-main { background:linear-gradient(135deg,#6c63ff,#48cfad); color:#fff; box-shadow:0 2px 12px #6c63ff55; }
+  .btn-main:hover { transform:translateY(-1px); box-shadow:0 4px 20px #6c63ff88; }
+  .btn-sec { background:#222240; color:#aab; border:1px solid #3a3a60; }
+  .btn-sec:hover { background:#2a2a50; }
+  .speed-wrap { display:flex; align-items:center; gap:8px; font-size:0.68rem; color:#666688; }
+  input[type=range] {
+    -webkit-appearance:none; width:80px; height:3px;
+    background:#2a2a50; border-radius:2px; outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance:none; width:13px; height:13px;
+    background:#6c63ff; border-radius:50%; cursor:pointer;
+  }
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .stat { background:#16213e; border:1px solid #2a2a50; border-radius:12px; padding:12px 14px; text-align:center; }
+  .stat .n { font-family:'DM Mono',monospace; font-size:1.5rem; font-weight:500; color:#6c63ff; }
+  .stat .l { font-size:0.65rem; color:#666688; margin-top:3px; }
+  .callout {
+    background:#16213e; border:1px solid #2a2a50; border-left:3px solid #48cfad;
+    border-radius:10px; padding:14px 16px;
+    font-size:0.74rem; color:#8888bb; line-height:1.75;
+  }
+  .callout b { color:#ccc; }
+</style>
+</head>
+<body>
+<h1>🎯 Galton Board</h1>
+<div class="sub">Each peg = a coin flip · Watch the bell curve emerge</div>
+<div class="wrap">
+  <div class="board-card">
+    <canvas id="cv"></canvas>
+    <div class="btns">
+      <button class="btn-main" id="btnDrop">▶ Drop Balls</button>
+      <button class="btn-sec" id="btnOne">Drop 1</button>
+      <button class="btn-sec" id="btnReset">↺ Reset</button>
+      <div class="speed-wrap">
+        <span>Speed</span>
+        <input type="range" id="speed" min="1" max="8" value="3">
+      </div>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="n" id="sN">0</div><div class="l">balls dropped</div></div>
+    <div class="stat"><div class="n" id="sMu" style="color:#48cfad">—</div><div class="l">mean (center)</div></div>
+    <div class="stat"><div class="n" id="sSd" style="color:#f8c97a">—</div><div class="l">std deviation</div></div>
+  </div>
+  <div class="callout">
+    <b>Why a bell curve?</b> Each ball bounces <b>left or right randomly</b> at every peg — like flipping a coin.
+    Most balls accumulate near the center (roughly equal lefts & rights).
+    Ending far out requires an unlikely streak of the same outcome — so the edges stay thin.
+    <b>Many small random steps always produce a normal distribution</b> — this is the Central Limit Theorem.
+  </div>
+</div>
+
+<script>
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+
+const ROWS = 10;
+const BINS = ROWS + 1; // 11 bins
+let W, H;
+
+// Board geometry (recomputed on resize)
+let pegs = [];      // pegs[row][col] = {x,y}
+let binLeft = [];   // left edge x of each bin
+let binW;
+let binTop, binMaxH;
+
+function layout() {
+  const cw = cv.parentElement.clientWidth - 32;
+  W = Math.min(cw, 640);
+  H = Math.round(W * 0.78);
+  cv.width = W; cv.height = H;
+
+  const PAD = W * 0.06;
+  const pegSpanW = W - 2 * PAD;   // total width the bottom peg row occupies
+  const pegTop = H * 0.05;
+  const pegBottom = H * 0.60;
+
+  // Peg grid: row r has (r+1) pegs evenly spaced over pegSpanW*(r/ROWS) width, centered
+  pegs = [];
+  for (let r = 0; r < ROWS; r++) {
+    pegs[r] = [];
+    const count = r + 1;
+    const rowSpan = pegSpanW * (r / (ROWS - 1));  // grows from 0 to full width
+    const y = pegTop + (r / (ROWS - 1)) * (pegBottom - pegTop);
+    for (let c = 0; c < count; c++) {
+      const x = count === 1
+        ? W / 2
+        : W / 2 - rowSpan / 2 + c * (rowSpan / (count - 1));
+      pegs[r].push({ x, y });
+    }
+  }
+
+  // Bins sit below the last peg row, same spacing as bottom row
+  binTop = H * 0.63;
+  binMaxH = H * 0.33;
+  const bottomRow = pegs[ROWS - 1];
+  // bin width = spacing between bottom pegs
+  binW = bottomRow.length > 1
+    ? (bottomRow[bottomRow.length - 1].x - bottomRow[0].x) / (bottomRow.length - 1)
+    : W / BINS;
+
+  binLeft = [];
+  for (let b = 0; b < BINS; b++) {
+    // center of bin b aligns with bottom peg b (left half) and b (right half)
+    // bottom row has ROWS pegs → ROWS+1 = BINS gaps between & outside them
+    const centerX = bottomRow[0].x - binW / 2 + b * binW;
+    binLeft[b] = centerX;
+  }
+}
+
+// ---- Ball path ----
+// A ball starts at the top center.
+// At row r it hits peg[r][col] and goes left (col stays) or right (col+1).
+// Final bin = number of right-turns taken (0..ROWS).
+function makePath() {
+  let col = 0; // will track which peg in each row
+  const waypoints = []; // {x,y}
+
+  // Entry point above first peg
+  waypoints.push({ x: pegs[0][0].x, y: pegs[0][0].y - H * 0.08 });
+
+  for (let r = 0; r < ROWS; r++) {
+    const peg = pegs[r][col];
+    waypoints.push({ x: peg.x, y: peg.y });
+    const goRight = Math.random() < 0.5;
+    if (goRight) col++;
+    // col stays same (left) or increases (right) — matches triangle layout
+  }
+
+  // Final bin = col (number of rights taken)
+  const bin = col; // 0..ROWS → 0..BINS-1
+  const binCenterX = binLeft[bin] + binW / 2;
+  waypoints.push({ x: binCenterX, y: binTop + 6 });
+
+  return { waypoints, bin };
+}
+
+// ---- State ----
+let activeBalls = [];  // {waypoints, t, bin, done}
+let bins = new Array(BINS).fill(0);
+let totalDropped = 0;
+let autoDropping = false, autoTimer = null;
+
+function spawnBall() {
+  const { waypoints, bin } = makePath();
+  activeBalls.push({ waypoints, t: 0, bin, done: false });
+}
+
+function getSpeed() { return parseInt(document.getElementById('speed').value); }
+
+// interpolate along waypoints, t in [0,1]
+function interpPath(waypoints, t) {
+  const n = waypoints.length - 1;
+  const raw = t * n;
+  const seg = Math.min(Math.floor(raw), n - 1);
+  let lt = raw - seg;
+  // ease in-out
+  lt = lt < 0.5 ? 2 * lt * lt : -1 + (4 - 2 * lt) * lt;
+  const a = waypoints[seg], b = waypoints[seg + 1];
+  return { x: a.x + (b.x - a.x) * lt, y: a.y + (b.y - a.y) * lt };
+}
+
+// ---- Draw ----
+const PEG_R = () => Math.max(3.5, W * 0.008);
+const BALL_R = () => Math.max(5, W * 0.012);
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  // background
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#12122a');
+  bg.addColorStop(1, '#0a0a18');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  const pr = PEG_R(), br = BALL_R();
+
+  // pegs
+  for (let r = 0; r < ROWS; r++) {
+    for (const p of pegs[r]) {
+      ctx.beginPath(); ctx.arc(p.x, p.y, pr, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff28'; ctx.fill();
+      ctx.strokeStyle = '#ffffff55'; ctx.lineWidth = 1; ctx.stroke();
+    }
+  }
+
+  // bins
+  const maxBin = Math.max(1, ...bins);
+  for (let b = 0; b < BINS; b++) {
+    const bh = (bins[b] / maxBin) * binMaxH;
+    const x = binLeft[b] + 1.5, w = binW - 3;
+
+    // bin outline
+    ctx.strokeStyle = '#2a2a55'; ctx.lineWidth = 1;
+    ctx.strokeRect(x, binTop, w, binMaxH);
+
+    if (bh > 0) {
+      const g = ctx.createLinearGradient(0, binTop + binMaxH - bh, 0, binTop + binMaxH);
+      g.addColorStop(0, '#6c63ffdd');
+      g.addColorStop(1, '#48cfadbb');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.roundRect(x, binTop + binMaxH - bh, w, bh, [3, 3, 0, 0]);
+      ctx.fill();
+    }
+  }
+
+  // normal curve overlay
+  if (totalDropped > 40) {
+    let sum = 0, sum2 = 0;
+    for (let b = 0; b < BINS; b++) { sum += bins[b] * b; sum2 += bins[b] * b * b; }
+    const mu = sum / totalDropped;
+    const sd = Math.sqrt(Math.max(0.01, sum2 / totalDropped - mu * mu));
+    const norm = b => Math.exp(-0.5 * ((b - mu) / sd) ** 2) / (sd * Math.sqrt(2 * Math.PI));
+    const peak = norm(mu);
+
+    ctx.beginPath();
+    for (let b = 0; b < BINS; b++) {
+      const cx = binLeft[b] + binW / 2;
+      const density = norm(b) / peak;
+      const y = binTop + binMaxH * (1 - density);
+      b === 0 ? ctx.moveTo(cx, y) : ctx.lineTo(cx, y);
+    }
+    ctx.strokeStyle = '#ffffffaa';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([6, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // active balls
+  for (const ball of activeBalls) {
+    if (ball.done) continue;
+    const pos = interpPath(ball.waypoints, Math.min(ball.t, 0.9999));
+
+    // glow
+    const grd = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, br * 3.5);
+    grd.addColorStop(0, '#f0c06066'); grd.addColorStop(1, 'transparent');
+    ctx.beginPath(); ctx.arc(pos.x, pos.y, br * 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = grd; ctx.fill();
+
+    ctx.beginPath(); ctx.arc(pos.x, pos.y, br, 0, Math.PI * 2);
+    ctx.fillStyle = '#f0c060'; ctx.fill();
+    ctx.strokeStyle = '#fffb'; ctx.lineWidth = 1.2; ctx.stroke();
+  }
+}
+
+// ---- Loop ----
+function update() {
+  const spd = getSpeed();
+  for (let i = activeBalls.length - 1; i >= 0; i--) {
+    const b = activeBalls[i];
+    b.t += 0.008 * spd;
+    if (b.t >= 1 && !b.done) {
+      b.done = true;
+      bins[b.bin]++;
+      totalDropped++;
+      updateStats();
+      activeBalls.splice(i, 1);
+    }
+  }
+}
+
+function updateStats() {
+  document.getElementById('sN').textContent = totalDropped;
+  if (totalDropped < 2) return;
+  let sum = 0, sum2 = 0;
+  for (let b = 0; b < BINS; b++) { sum += bins[b] * b; sum2 += bins[b] * b * b; }
+  const mu = sum / totalDropped;
+  const sd = Math.sqrt(Math.max(0, sum2 / totalDropped - mu * mu));
+  // center around 0
+  document.getElementById('sMu').textContent = (mu - ROWS / 2).toFixed(2);
+  document.getElementById('sSd').textContent = sd.toFixed(2);
+}
+
+let animId;
+function loop() { update(); draw(); animId = requestAnimationFrame(loop); }
+
+// ---- Controls ----
+function startAuto() {
+  autoDropping = true;
+  document.getElementById('btnDrop').textContent = '⏸ Pause';
+  function tick() {
+    const spd = getSpeed();
+    for (let i = 0; i < Math.max(1, spd - 1); i++) spawnBall();
+    autoTimer = setTimeout(tick, Math.max(16, 180 / spd));
+  }
+  tick();
+}
+function stopAuto() {
+  autoDropping = false;
+  clearTimeout(autoTimer);
+  document.getElementById('btnDrop').textContent = '▶ Drop Balls';
+}
+
+document.getElementById('btnDrop').addEventListener('click', () => autoDropping ? stopAuto() : startAuto());
+document.getElementById('btnOne').addEventListener('click', spawnBall);
+document.getElementById('btnReset').addEventListener('click', () => {
+  stopAuto(); activeBalls = []; bins.fill(0); totalDropped = 0;
+  document.getElementById('sN').textContent = '0';
+  document.getElementById('sMu').textContent = '—';
+  document.getElementById('sSd').textContent = '—';
+});
+
+window.addEventListener('resize', layout);
+layout();
+loop();
+</script>
+</body>
+</html>
